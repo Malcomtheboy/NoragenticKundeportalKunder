@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Noragentic – Kundeportal Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">N</div>
+
+      <h1>Kundeportal</h1>
+      <p class="auth-sub">
+        Logg inn for å se prosjektet ditt
+      </p>
+
+      <form id="loginForm" class="auth-form">
+
+        <label class="auth-field">
+          <span>E-post</span>
+          <input type="email" required />
+        </label>
+
+        <label class="auth-field">
+          <span>Passord</span>
+          <input type="password" required />
+        </label>
+
+        <button class="btn primary" type="submit">
+          Logg inn
+        </button>
+
+        <p id="hint"></p>
+
+      </form>
+
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

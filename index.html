@@ -46,34 +46,38 @@
       <div class="left-column">
 
         <div class="panel card">
-          <div class="section-title">Prosjektbeskrivelse</div>
-          <div class="placeholder-box">
-            <strong>Placeholder</strong><br>
-            Her kan prosjektbeskrivelse fra backend vises
-          </div>
-        </div>
-
-        <div class="panel card">
           <div class="section-title">Ukesstatus</div>
           <div class="placeholder-box">
             <strong>Placeholder</strong><br>
             Her kan ukentlig status vises
           </div>
         </div>
+        <div class="panel card">
+          <div class="section-title">Filer</div>
 
+          <div id="fileManager" class="file-manager-shell">
+            <div class="file-manager-topbar">
+              <div id="breadcrumbBar" class="breadcrumb-bar"></div>
+              <button id="uploadBtn" class="upload-btn" type="button">Last opp</button>
+            </div>
+
+            <input type="file" id="fileInput" hidden />
+            <div id="contentsList" class="loading-state">Laster...</div>
+          </div>
+        </div>
       </div>
 
       <!-- HØYRE -->
       <div class="right-column">
 
+
         <div class="panel card">
-          <div class="section-title">Filer</div>
-          <div class="placeholder-box tall">
+          <div class="section-title">Prosjektbeskrivelse</div>
+          <div class="placeholder-box">
             <strong>Placeholder</strong><br>
-            Her kan filer vises
+            Her kan prosjektbeskrivelse fra backend vises
           </div>
         </div>
-
         <div class="panel card">
           <div class="section-title">Gruppechat</div>
           <div class="placeholder-box tall">
@@ -88,6 +92,7 @@
 
   </main>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
+  <script type="module" src="file-manager.js"></script>
 </body>
 </html>

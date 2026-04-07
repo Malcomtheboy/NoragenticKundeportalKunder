@@ -37,9 +37,9 @@ if (isLoginPage) {
 if (isDashboardPage) {
 
   const projects = {
-    p1: { name: "Prosjekt 1", goal: "Prototype utvikling" },
-    p2: { name: "Prosjekt 2", goal: "Backend integrasjon" },
-    p3: { name: "Prosjekt 3", goal: "Testing fase" }
+    p1: { name: "Prosjekt 1", goal: "Prototype utvikling", id: "PROJECT_ABC_123" }, // @aslak lagt til id
+    p2: { name: "Prosjekt 2", goal: "Backend integrasjon", id: "PROJECT_DEF_456" }, // @aslak
+    p3: { name: "Prosjekt 3", goal: "Testing fase", id: "PROJECT_GHI_789" } // @aslak
   };
 
   let currentProject = "p1";
@@ -54,6 +54,17 @@ if (isDashboardPage) {
     projectGoal.textContent = p.goal;
   }
 
+  // @aslak denne funksjone sender valgt prosjekt til file-manager.js
+  function updateFileManager(projectId) {
+        window.currentProjectId = projectId;
+
+        window.dispatchEvent(
+            new CustomEvent("projectChanged", {
+            detail: { projectId }
+      })
+    );
+  }
+
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       tabs.forEach(t => t.classList.remove("is-active"));
@@ -61,6 +72,9 @@ if (isDashboardPage) {
 
       currentProject = tab.dataset.project;
       renderProject(projects[currentProject]);
+
+      //@aslak oppdater filer når prosjekt byttes
+      updateFileManager(projects[currentProject].id);
     });
   });
 
@@ -70,4 +84,7 @@ if (isDashboardPage) {
   });
 
   renderProject(projects[currentProject]);
+
+  // @aslak last filer for første prosjekt ved oppstart
+  updateFileManager(projects[currentProject].id);
 }

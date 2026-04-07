@@ -1,0 +1,302 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// Firebase Storage for filopplasting
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB-0bWNNs2LgzAm48-Kymlzu1aEzWQXiNw",
+  authDomain: "noragenticportal.firebaseapp.com",
+  projectId: "noragenticportal",
+  storageBucket: "noragenticportal.firebasestorage.app",
+  messagingSenderId: "662374310916",
+  appId: "1:662374310916:web:a3a5d708bdd380a7210151",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const breadcrumbBar = document.getElementById("breadcrumbBar");
+const contentsList = document.getElementById("contentsList");
+
+// last elementer fra index.html
+const fileInput = document.getElementById("fileInput");
+const uploadBtn = document.getElementById("uploadBtn");
+
+let currentProjectId = null;
+let currentFolderId = null;
+let currentPath = [{ id: null, name: "Home" }];
+function formatDate(timestamp) {
+  if (!timestamp) return "Unknown";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return date.toLocaleDateString("no-NO");
+}
+
+function escapeHtml(text) {
+  if (text === null || text === undefined) return "";
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function renderBreadcrumbs() {
+  if (!breadcrumbBar) return;
+
+  const html = currentPath.map((segment, index) => {
+    const isLast = index === currentPath.length - 1;
+
+    if (isLast) {
+      return `<span class="breadcrumb-current">${escapeHtml(segment.name)}</span>`;
+    }
+
+    return `
+      <button class="breadcrumb-link" data-path-index="${index}">
+        ${escapeHtml(segment.name)}
+      </button>
+      <span class="breadcrumb-separator">/</span>
+    `;
+  }).join("");
+
+  breadcrumbBar.innerHTML = html;
+
+  breadcrumbBar.querySelectorAll("[data-path-index]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const index = Number(btn.dataset.pathIndex);
+      currentPath = currentPath.slice(0, index + 1);
+      currentFolderId = currentPath[currentPath.length - 1].id;
+      renderBreadcrumbs();
+      await loadContents();
+    });
+  });
+}
+
+async function loadContents() {
+  if (!currentProjectId || !contentsList) return;
+
+  contentsList.className = "loading-state";
+  contentsList.innerHTML = "Laster...";
+
+  try {
+    const foldersQuery = query(
+      collection(db, "folders"),
+      where("projectId", "==", currentProjectId),
+      where("parentFolderId", "==", currentFolderId)
+    );
+
+    const filesQuery = query(
+      collection(db, "files"),
+      where("projectId", "==", currentProjectId),
+      where("folderId", "==", currentFolderId),
+      where("customerVisibility", "==", true)
+    );
+
+    const [foldersSnapshot, filesSnapshot] = await Promise.all([
+      getDocs(foldersQuery),
+      getDocs(filesQuery)
+    ]);
+
+    const folders = [];
+    const files = [];
+
+    foldersSnapshot.forEach((docSnap) => {
+      folders.push({ id: docSnap.id, ...docSnap.data() });
+    });
+
+    filesSnapshot.forEach((docSnap) => {
+      files.push({ id: docSnap.id, ...docSnap.data() });
+    });
+
+    folders.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    files.sort((a, b) => (b.dateUploaded?.seconds || 0) - (a.dateUploaded?.seconds || 0));
+
+    if (folders.length === 0 && files.length === 0) {
+      contentsList.className = "empty-state";
+      contentsList.innerHTML = "Denne mappen er tom.";
+      return;
+    }
+
+    let html = `
+      <div class="table-wrap">
+        <table class="files-table">
+          <thead>
+            <tr>
+              <th>Navn</th>
+              <th>Type</th>
+              <th>Lastet opp</th>
+              <th>Av</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    folders.forEach((folder) => {
+      html += `
+        <tr>
+          <td>
+            <button
+              class="link-button"
+              data-folder-id="${folder.id}"
+              data-folder-name="${escapeHtml(folder.name || "")}"
+            >
+              ${escapeHtml(folder.name || "-")}
+            </button>
+          </td>
+          <td>Mappe</td>
+          <td>${formatDate(folder.createdAt)}</td>
+          <td>${escapeHtml(folder.createdBy || "-")}</td>
+        </tr>
+      `;
+    });
+
+    files.forEach((file) => {
+      const nameCell = file.fileUrl
+        ? `<a class="file-link" href="${escapeHtml(file.fileUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(file.filename || "")}</a>`
+        : escapeHtml(file.filename || "-");
+
+      html += `
+        <tr>
+          <td>${nameCell}</td>
+          <td>Fil</td>
+          <td>${formatDate(file.dateUploaded)}</td>
+          <td>${escapeHtml(file.uploadedBy || "-")}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    contentsList.className = "";
+    contentsList.innerHTML = html;
+
+    contentsList.querySelectorAll("[data-folder-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        currentFolderId = btn.dataset.folderId;
+        currentPath.push({
+          id: btn.dataset.folderId,
+          name: btn.dataset.folderName
+        });
+        renderBreadcrumbs();
+        await loadContents();
+      });
+    });
+  } catch (e) {
+    console.error("Load contents error:", e);
+    contentsList.className = "error-state";
+    contentsList.innerHTML = "Kunne ikke laste filer.";
+  }
+}
+
+async function uploadSelectedFile(file) {
+  if (!file) return;
+
+  if (!currentProjectId) {
+    alert("Ingen prosjekt valgt");
+    return;
+  }
+
+  try {
+    if (uploadBtn) {
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Laster opp...";
+    }
+
+    const storageRef = ref(
+      storage,
+      `projects/${currentProjectId}/${file.name}`
+    );
+
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    const { addDoc, serverTimestamp } = await import(
+      "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
+    );
+
+    await addDoc(collection(db, "files"), {
+      filename: file.name,
+      fileUrl: downloadURL,
+      projectId: currentProjectId,
+      folderId: currentFolderId || null,
+      uploadedBy: "Kunde",
+      customerVisibility: true,
+      dateUploaded: serverTimestamp()
+    });
+    fileInput.value = "";
+
+    await loadContents();
+  } catch (e) {
+    console.error("Upload error:", e);
+    alert("Feil ved opplasting");
+  } finally {
+    if (uploadBtn) {
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = "Last opp";
+    }
+  }
+}
+
+if (uploadBtn && fileInput) {
+  uploadBtn.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files?.[0];
+    await uploadSelectedFile(file);
+  });
+}
+
+async function ensureFirebaseLogin() {
+  try {
+    await signInWithEmailAndPassword(auth, "test@test.no", "123456");
+  } catch (e) {
+    console.error("Firebase login feilet:", e);
+  }
+}
+
+window.addEventListener("projectChanged", async (event) => {
+  currentProjectId = event.detail.projectId;
+
+  await ensureFirebaseLogin();
+
+  currentFolderId = null;
+  currentPath = [{ id: null, name: "Home" }];
+  renderBreadcrumbs();
+  await loadContents();
+});
+
+async function initFileManager() {
+  await ensureFirebaseLogin();
+
+  if (window.currentProjectId) {
+    currentProjectId = window.currentProjectId;
+    currentFolderId = null;
+    currentPath = [{ id: null, name: "Home" }];
+    renderBreadcrumbs();
+    await loadContents();
+  }
+}
+
+initFileManager();

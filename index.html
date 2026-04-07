@@ -79,19 +79,22 @@
           </div>
         </div>
         <div class="panel card">
-          <div class="section-title">Gruppechat</div>
-          <div class="placeholder-box tall">
-            <strong>Placeholder</strong><br>
-            Chat kobles inn her senere
+          <div class="chat-box">
+
+            <div id="chatMessages" class="chat-messages"></div>
+          
+            <form id="chatForm" class="chat-input">
+              <input id="chatInput" type="text" placeholder="Skriv melding..." />
+              <button type="submit" class="btn">Send</button>
+            </form>
+          
+            <button id="testBtn" class="btn small">Test DB</button>
+          
           </div>
-        </div>
-
-      </div>
-
-    </section>
+        </section>
 
   </main>
-
+  <script type="module" src="chat.js"></script>
   <script type="module" src="script.js"></script>
   <script type="module" src="file-manager.js"></script>
 </body>

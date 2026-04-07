@@ -420,7 +420,6 @@ body{
     padding:16px;
   }
 }
-/* 🔥 NYTT: topbar for breadcrumb + upload */
 .file-manager-topbar{
   display:flex;
   align-items:center;
@@ -428,7 +427,6 @@ body{
   margin-bottom:12px;
 }
 
-/* 🔧 ENDRET: breadcrumb tar all ledig plass */
 .breadcrumb-bar{
   flex:1;
   display:flex;
@@ -444,7 +442,6 @@ body{
   min-height:42px;
 }
 
-/* 🔥 NYTT: liten blå upload-knapp */
 .upload-btn{
   width:auto;
   flex:0 0 auto;

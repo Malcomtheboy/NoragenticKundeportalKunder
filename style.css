@@ -145,19 +145,19 @@ body{
   line-height:1.5;
 }
 
-.placeholder-box{
+.editable-box{
   min-height:140px;
-  border:1px dashed rgba(255,255,255,0.22);
+  border:1px dashed rgba(255,255,255,0.18);
   border-radius:14px;
   padding:16px;
-  background:rgba(255,255,255,0.9);
-  color:#111;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:8px;
-  font-size:13px;
+  background:rgba(90, 108, 160, 0.18);
+  color:rgba(255,255,255,0.92);
+  font-size:14px;
+  line-height:1.5;
+  outline:none;
+  cursor:text;
 }
+
 
 .placeholder-box.tall{
   min-height:150px;
@@ -636,6 +636,12 @@ body{
   justify-content:center;
   gap:8px;
 }
+
+.editable-box:empty::before{
+  content: attr(data-placeholder);
+  color: rgba(255,255,255,0.75);
+}
+
 
 .placeholder-box.tall{
   min-height:240px;

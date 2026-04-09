@@ -221,11 +221,13 @@ async function uploadSelectedFile(file) {
       uploadBtn.disabled = true;
       uploadBtn.textContent = "Laster opp...";
     }
+    const uniqueFileName = `${Date.now()}-${file.name}`;
 
-    const storageRef = ref(
-      storage,
-      `projects/${currentProjectId}/${file.name}`
-    );
+   const storageRef = ref(
+  storage,
+  `projects/${currentProjectId}/${uniqueFileName}`
+);
+
 
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
@@ -237,6 +239,7 @@ async function uploadSelectedFile(file) {
     await addDoc(collection(db, "files"), {
       filename: file.name,
       fileUrl: downloadURL,
+      storagePath: `projects/${currentProjectId}/${uniqueFileName}`,
       projectId: currentProjectId,
       folderId: currentFolderId || null,
       uploadedBy: "Kunde",

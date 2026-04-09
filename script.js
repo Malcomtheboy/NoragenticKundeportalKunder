@@ -50,9 +50,11 @@ if (isDashboardPage) {
   const logoutBtn = document.getElementById("logoutBtn");
 
   function renderProject(p) {
-    projectName.textContent = p.name;
-    projectGoal.textContent = p.goal;
-  }
+  projectName.textContent = p.name;
+  projectGoal.textContent = p.goal;
+}
+
+
 
   // @aslak denne funksjone sender valgt prosjekt til file-manager.js
   function updateFileManager(projectId) {

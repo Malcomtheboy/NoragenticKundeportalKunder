@@ -58,7 +58,7 @@
           <div id="fileManager" class="file-manager-shell">
             <div class="file-manager-topbar">
               <div id="breadcrumbBar" class="breadcrumb-bar"></div>
-              <button id="uploadBtn" class="upload-btn" type="button">Last opp</button>
+              <button id="uploadBtn" class="btn small" type="button">Last opp</button>
             </div>
 
             <input type="file" id="fileInput" hidden />
@@ -69,21 +69,26 @@
 
       <!-- HØYRE -->
       <div class="right-column">
+        <section class="panel card">
+          <div class="section-title">Ansatte på prosjekt</div>
+          <p class="section-description">
+            Oversikt over hvilke ansatte som er tilknyttet prosjektet og deres roller.
+          </p>
 
+          <div id="teamPlaceholder" class="team-loading">
+            Laster ansatte...
+          </div>
+        </section>
 
         <div class="panel card">
           <div class="section-title">Prosjektbeskrivelse</div>
          <div id="projectDescription" class="editable-box"></div>
-
         </div>
 
-       <div class="panel card">
-       <div class="section-title">Kundebeskrivelse</div>
-       <div id="customerDescription" class="editable-box"></div>
-       
+        <div class="panel card">
+          <div class="section-title">Kundebeskrivelse</div>
+          <div id="customerDescription" class="editable-box"></div>
         </div>
-
-
 
         <div class="panel card">
           <div class="chat-box">
@@ -104,5 +109,6 @@
   <script type="module" src="chat.js"></script>
   <script type="module" src="script.js"></script>
   <script type="module" src="file-manager.js"></script>
+  <script type="module" src="team-overview.js"></script>
 </body>
 </html>

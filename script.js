@@ -1,3 +1,12 @@
+import { db } from "./firebase-auth.js";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
 const isLoginPage = !!document.getElementById("loginForm");
 const isDashboardPage = !!document.getElementById("projectName");
 
@@ -36,11 +45,8 @@ if (isLoginPage) {
 /* DASHBOARD */
 if (isDashboardPage) {
 
-  const projects = {
-    p1: { name: "Prosjekt 1", goal: "Prototype utvikling", id: "PROJECT_ABC_123" }, // @aslak lagt til id
-    p2: { name: "Prosjekt 2", goal: "Backend integrasjon", id: "PROJECT_DEF_456" }, // @aslak
-    p3: { name: "Prosjekt 3", goal: "Testing fase", id: "PROJECT_GHI_789" } // @aslak
-  };
+  let projects = {};
+
 
   let currentProject = "p1";
 
@@ -48,10 +54,62 @@ if (isDashboardPage) {
   const projectGoal = document.getElementById("projectGoal");
   const tabs = document.querySelectorAll(".tab");
   const logoutBtn = document.getElementById("logoutBtn");
+  const projectDescription = document.getElementById("projectDescription");
+  const customerDescription = document.getElementById("customerDescription");
+  const projectTabs = document.querySelectorAll(".tab");
+
 
   function renderProject(p) {
   projectName.textContent = p.name;
   projectGoal.textContent = p.goal;
+}
+
+async function loadDescriptions(projectId) {
+  if (!projectId) return;
+
+  try {
+    const projectSnap = await getDoc(doc(db, "projects", projectId));
+    if (!projectSnap.exists()) return;
+
+    const data = projectSnap.data();
+
+    if (projectDescription) {
+      projectDescription.textContent = data.prosjektBeskrivelse || "";
+    }
+
+    if (customerDescription) {
+      customerDescription.textContent = data.kundeBeskrivelse || "";
+    }
+  } catch (error) {
+    console.error("Kunne ikke laste prosjektdata:", error);
+  }
+}
+async function loadProjects() {
+  const snapshot = await getDocs(collection(db, "projects"));
+  const docs = [];
+
+  snapshot.forEach((docSnap) => {
+    docs.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  docs.sort((a, b) => (a.name || "").localeCompare(b.name || "", "no"));
+
+  projectTabs.forEach((tab, index) => {
+    const project = docs[index];
+    if (!project) return;
+
+    projects[tab.dataset.project] = project;
+    tab.textContent = project.name || `Prosjekt ${index + 1}`;
+  });
+
+  if (projects[currentProject]) {
+    renderProject(projects[currentProject]);
+    loadDescriptions(projects[currentProject].id);
+    updateFileManager(projects[currentProject].id);
+  }
 }
 
 
@@ -72,21 +130,22 @@ if (isDashboardPage) {
       tabs.forEach(t => t.classList.remove("is-active"));
       tab.classList.add("is-active");
 
-      currentProject = tab.dataset.project;
-      renderProject(projects[currentProject]);
+     currentProject = tab.dataset.project;
 
-      //@aslak oppdater filer når prosjekt byttes
-      updateFileManager(projects[currentProject].id);
-    });
-  });
+const project = projects[currentProject];
+if (!project) return;
 
+renderProject(project);
+loadDescriptions(project.id);
+
+//@aslak oppdater filer når prosjekt byttes
+updateFileManager(project.id);
+ });
+});
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("customer_logged_in");
     window.location.href = "login.html";
   });
 
-  renderProject(projects[currentProject]);
-
-  // @aslak last filer for første prosjekt ved oppstart
-  updateFileManager(projects[currentProject].id);
-}
+ loadProjects();
+ }

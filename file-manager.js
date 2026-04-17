@@ -1,15 +1,15 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+// Mohamed – kundeportal file-manager.js
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
 import {
   getFirestore,
   collection,
   getDocs,
   query,
-  where
+  where,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// Firebase Storage for filopplasting
 import {
   getStorage,
   ref,
@@ -26,23 +26,23 @@ const firebaseConfig = {
   appId: "1:662374310916:web:a3a5d708bdd380a7210151",
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
 const breadcrumbBar = document.getElementById("breadcrumbBar");
 const contentsList = document.getElementById("contentsList");
-
-// last elementer fra index.html
 const fileInput = document.getElementById("fileInput");
 const uploadBtn = document.getElementById("uploadBtn");
+const newFolderBtn = document.getElementById("newFolderBtn");
 
 let currentProjectId = null;
 let currentFolderId = null;
-let currentPath = [{ id: null, name: "Home" }];
+let currentPath = [{ id: null, name: "Rot" }];
+
 function formatDate(timestamp) {
-  if (!timestamp) return "Unknown";
+  if (!timestamp) return "-";
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   return date.toLocaleDateString("no-NO");
 }
@@ -55,6 +55,17 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+// Mohamed – midlertidig service-login slik resten av prosjektet gjør
+async function ensureFirebaseLogin() {
+  try {
+    if (!auth.currentUser) {
+      await signInWithEmailAndPassword(auth, "test@test.no", "123456");
+    }
+  } catch (e) {
+    console.error("// Mohamed – Firebase login feilet:", e);
+  }
 }
 
 function renderBreadcrumbs() {
@@ -104,8 +115,7 @@ async function loadContents() {
     const filesQuery = query(
       collection(db, "files"),
       where("projectId", "==", currentProjectId),
-      where("folderId", "==", currentFolderId),
-      where("customerVisibility", "==", true)
+      where("folderId", "==", currentFolderId)
     );
 
     const [foldersSnapshot, filesSnapshot] = await Promise.all([
@@ -121,11 +131,18 @@ async function loadContents() {
     });
 
     filesSnapshot.forEach((docSnap) => {
-      files.push({ id: docSnap.id, ...docSnap.data() });
+      const data = docSnap.data();
+      const isVisible = data.customerVisibility !== false && data.visibleToClient !== false;
+      if (!isVisible) return;
+      files.push({ id: docSnap.id, ...data });
     });
 
-    folders.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    files.sort((a, b) => (b.dateUploaded?.seconds || 0) - (a.dateUploaded?.seconds || 0));
+    folders.sort((a, b) => (a.name || "").localeCompare(b.name || "", "no"));
+    files.sort((a, b) => {
+      const aSec = a.dateUploaded?.seconds || a.createdAt?.seconds || 0;
+      const bSec = b.dateUploaded?.seconds || b.createdAt?.seconds || 0;
+      return bSec - aSec;
+    });
 
     if (folders.length === 0 && files.length === 0) {
       contentsList.className = "empty-state";
@@ -167,15 +184,18 @@ async function loadContents() {
     });
 
     files.forEach((file) => {
+      const filename = file.filename || file.fileName || "-";
+      const fileDate = file.dateUploaded || file.createdAt;
+
       const nameCell = file.fileUrl
-        ? `<a class="file-link" href="${escapeHtml(file.fileUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(file.filename || "")}</a>`
-        : escapeHtml(file.filename || "-");
+        ? `<a class="file-link" href="${escapeHtml(file.fileUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(filename)}</a>`
+        : escapeHtml(filename);
 
       html += `
         <tr>
           <td>${nameCell}</td>
           <td>Fil</td>
-          <td>${formatDate(file.dateUploaded)}</td>
+          <td>${formatDate(fileDate)}</td>
           <td>${escapeHtml(file.uploadedBy || "-")}</td>
         </tr>
       `;
@@ -202,61 +222,75 @@ async function loadContents() {
       });
     });
   } catch (e) {
-    console.error("Load contents error:", e);
+    console.error("// Mohamed – Load contents error:", e);
     contentsList.className = "error-state";
     contentsList.innerHTML = "Kunne ikke laste filer.";
   }
 }
 
+// Mohamed – kunde kan laste opp egne filer, men bare til prosjektet sitt
 async function uploadSelectedFile(file) {
-  if (!file) return;
-
-  if (!currentProjectId) {
-    alert("Ingen prosjekt valgt");
-    return;
-  }
+  if (!file || !currentProjectId) return;
 
   try {
     if (uploadBtn) {
       uploadBtn.disabled = true;
       uploadBtn.textContent = "Laster opp...";
     }
-    const uniqueFileName = `${Date.now()}-${file.name}`;
 
-   const storageRef = ref(
-  storage,
-  `projects/${currentProjectId}/${uniqueFileName}`
-);
-
+    const storagePath = `projects/${currentProjectId}/${currentFolderId || "root"}/${file.name}`;
+    const storageRef = ref(storage, storagePath);
 
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
 
-    const { addDoc, serverTimestamp } = await import(
-      "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"
-    );
-
     await addDoc(collection(db, "files"), {
       filename: file.name,
+      fileName: file.name,
       fileUrl: downloadURL,
-      storagePath: `projects/${currentProjectId}/${uniqueFileName}`,
       projectId: currentProjectId,
       folderId: currentFolderId || null,
       uploadedBy: "Kunde",
       customerVisibility: true,
-      dateUploaded: serverTimestamp()
+      visibleToClient: true,
+      storagePath,
+      dateUploaded: serverTimestamp(),
+      createdAt: serverTimestamp()
     });
-    fileInput.value = "";
 
+    fileInput.value = "";
     await loadContents();
   } catch (e) {
-    console.error("Upload error:", e);
-    alert("Feil ved opplasting");
+    console.error("// Mohamed – Upload error:", e);
+    alert("Feil ved opplasting.");
   } finally {
     if (uploadBtn) {
       uploadBtn.disabled = false;
       uploadBtn.textContent = "Last opp";
     }
+  }
+}
+
+// Mohamed – kunde kan opprette mapper i sin prosjektvisning
+async function createFolder() {
+  if (!currentProjectId) return;
+
+  const folderName = prompt("Skriv navn på ny mappe:");
+  if (!folderName || !folderName.trim()) return;
+
+  try {
+    await addDoc(collection(db, "folders"), {
+      name: folderName.trim(),
+      projectId: currentProjectId,
+      parentFolderId: currentFolderId || null,
+      createdBy: "Kunde",
+      createdAt: serverTimestamp()
+    });
+
+    await loadContents();
+  } catch (e) {
+    console.error("// Mohamed – Create folder error:", e);
+    alert("Kunne ikke opprette mappe.");
   }
 }
 
@@ -271,12 +305,10 @@ if (uploadBtn && fileInput) {
   });
 }
 
-async function ensureFirebaseLogin() {
-  try {
-    await signInWithEmailAndPassword(auth, "test@test.no", "123456");
-  } catch (e) {
-    console.error("Firebase login feilet:", e);
-  }
+if (newFolderBtn) {
+  newFolderBtn.addEventListener("click", async () => {
+    await createFolder();
+  });
 }
 
 window.addEventListener("projectChanged", async (event) => {
@@ -285,7 +317,7 @@ window.addEventListener("projectChanged", async (event) => {
   await ensureFirebaseLogin();
 
   currentFolderId = null;
-  currentPath = [{ id: null, name: "Home" }];
+  currentPath = [{ id: null, name: "Rot" }];
   renderBreadcrumbs();
   await loadContents();
 });
@@ -296,7 +328,7 @@ async function initFileManager() {
   if (window.currentProjectId) {
     currentProjectId = window.currentProjectId;
     currentFolderId = null;
-    currentPath = [{ id: null, name: "Home" }];
+    currentPath = [{ id: null, name: "Rot" }];
     renderBreadcrumbs();
     await loadContents();
   }

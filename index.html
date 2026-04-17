@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <div class="bg"></div>
 
   <header class="topbar">
@@ -23,7 +22,6 @@
   </header>
 
   <main class="wrap">
-
     <section class="hero">
       <div class="card small">
         <div class="label">Valgt prosjekt</div>
@@ -31,43 +29,65 @@
       </div>
 
       <div class="card wide">
-        <div class="label">Prosjektstatus / delmål</div>
-        <div class="big" id="projectGoal">Her vises aktivt delmål</div>
+        <div class="hero-top-row">
+          <div class="hero-goal-block">
+            <div class="label">Nåværende delmål:</div>
+            <div class="big" id="projectGoal">Laster delmål…</div>
+          </div>
 
-        <div class="placeholder-line">
-          Statuskomponent kobles inn her senere
+          <div class="hero-right">
+            <div class="hero-pct-badge" id="heroProgressPct">0%</div>
+          </div>
+        </div>
+
+        <div class="hero-bar-track">
+          <div class="hero-bar-fill" id="heroProgressBar" style="width:0%"></div>
         </div>
       </div>
     </section>
 
     <section class="dashboard">
-
-      <!-- VENSTRE -->
       <div class="left-column">
-
-        <div class="panel card">
+        <section class="panel card">
           <div class="section-title">Ukesstatus</div>
-          <div class="placeholder-box">
-            <strong>Placeholder</strong><br>
-            Her kan ukentlig status vises
+          <p class="section-description">
+            Ukentlig fremdrift og statistikk – oppdateres i sanntid.
+          </p>
+
+          <div id="weekPlaceholder">
+            <div class="analytics-loading">
+              <div class="analytics-spinner"></div>
+              <span>Kobler til database…</span>
+            </div>
           </div>
-        </div>
-        <div class="panel card">
+        </section>
+
+        <section class="panel card">
           <div class="section-title">Filer</div>
+          <p class="section-description">
+            Her ser du filer som er delt med deg, og kan laste opp egne prosjektfiler.
+          </p>
 
           <div id="fileManager" class="file-manager-shell">
             <div class="file-manager-topbar">
               <div id="breadcrumbBar" class="breadcrumb-bar"></div>
-              <button id="uploadBtn" class="btn small" type="button">Last opp</button>
+
+              <div class="file-actions">
+                <button id="newFolderBtn" class="upload-btn secondary" type="button">
+                  Ny mappe
+                </button>
+                <button id="uploadBtn" class="upload-btn" type="button">
+                  Last opp
+                </button>
+              </div>
             </div>
 
             <input type="file" id="fileInput" hidden />
             <div id="contentsList" class="loading-state">Laster...</div>
           </div>
-        </div>
+        </section>
       </div>
 
-      <!-- HØYRE -->
       <div class="right-column">
         <section class="panel card">
           <div class="section-title">Ansatte på prosjekt</div>
@@ -80,35 +100,49 @@
           </div>
         </section>
 
-        <div class="panel card">
+        <section class="panel card">
           <div class="section-title">Prosjektbeskrivelse</div>
-         <div id="projectDescription" class="editable-box"></div>
-        </div>
+          <p class="section-description">
+            Oversikt over prosjektets mål, innhold og kontekst.
+          </p>
 
-        <div class="panel card">
+          <div class="editable-box" id="projectDescription" data-placeholder="Ingen prosjektbeskrivelse tilgjengelig."></div>
+        </section>
+
+        <section class="panel card">
           <div class="section-title">Kundebeskrivelse</div>
-          <div id="customerDescription" class="editable-box"></div>
-        </div>
+          <p class="section-description">
+            Informasjon som er relevant for deg som kunde.
+          </p>
 
-        <div class="panel card">
+          <div class="editable-box" id="customerDescription" data-placeholder="Ingen kundebeskrivelse tilgjengelig."></div>
+        </section>
+
+        <section class="panel card">
+          <div class="section-title">Gruppechat</div>
+          <p class="section-description">
+            Her kan du kommunisere direkte med prosjektteamet.
+          </p>
+
           <div class="chat-box">
-
             <div id="chatMessages" class="chat-messages"></div>
-          
+
             <form id="chatForm" class="chat-input">
               <input id="chatInput" type="text" placeholder="Skriv melding..." />
               <button type="submit" class="btn">Send</button>
             </form>
-          
-            <button id="testBtn" class="btn small">Test DB</button>
-          
+
+            <button id="testBtn" class="btn small" type="button">Test DB</button>
           </div>
         </section>
-
+      </div>
+    </section>
   </main>
+
   <script type="module" src="chat.js"></script>
   <script type="module" src="script.js"></script>
   <script type="module" src="file-manager.js"></script>
   <script type="module" src="team-overview.js"></script>
+  <script type="module" src="Customer-analytics.js"></script>
 </body>
 </html>

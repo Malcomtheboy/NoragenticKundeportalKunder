@@ -12,21 +12,17 @@
   <header class="topbar">
     <div class="logo">N</div>
 
-    <nav class="project-tabs">
-      <button class="tab is-active" data-project="p1">Prosjekt 1</button>
-      <button class="tab" data-project="p2">Prosjekt 2</button>
-      <button class="tab" data-project="p3">Prosjekt 3</button>
-    </nav>
+    <nav class="project-tabs hidden" id="projectTabs"></nav>
 
     <button class="btn small" id="logoutBtn">Logg ut</button>
   </header>
 
   <main class="wrap">
     <section class="hero">
-      <div class="card small">
-        <div class="label">Valgt prosjekt</div>
-        <div class="big" id="projectName">Prosjekt 1</div>
-      </div>
+    <div class="card small">
+      <div class="label">Valgt prosjekt</div>
+      <div id="projectSelectorContainer"></div>
+    </div>
 
       <div class="card wide">
         <div class="hero-top-row">

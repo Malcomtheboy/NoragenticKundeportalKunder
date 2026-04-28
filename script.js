@@ -1,177 +1,183 @@
-// Mohamed – kundeportal script.js
-import { db } from "./firebase-auth.js";
-import {
-  collection,
-  getDocs,
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { auth, db } from "./firebase-auth.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const isLoginPage = !!document.getElementById("loginForm");
-const isDashboardPage = !!document.getElementById("projectName");
+const projectSelectorContainer = document.getElementById("projectSelectorContainer");
+const projectGoal = document.getElementById("projectGoal");
+const logoutBtn = document.getElementById("logoutBtn");
+const projectDescription = document.getElementById("projectDescription");
+const customerDescription = document.getElementById("customerDescription");
+const projectTabs = document.getElementById("projectTabs");
 
-/* ROUTE GUARD */
-(function () {
-  const path = window.location.pathname.toLowerCase();
-  const loggedIn = localStorage.getItem("customer_logged_in") === "true";
-
-  if (path.includes("index") && !loggedIn) {
-    window.location.href = "login.html";
-  }
-
-  if (path.includes("login") && loggedIn) {
-    window.location.href = "index.html";
-  }
-})();
-
-/* LOGIN */
-if (isLoginPage) {
-  const form = document.getElementById("loginForm");
-  const hint = document.getElementById("hint");
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    localStorage.setItem("customer_logged_in", "true");
-    localStorage.setItem("role", "kunde"); // Mohamed – brukt av chat.js
-
-    hint.textContent = "Logger inn...";
-
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 300);
-  });
+function escapeHtml(text) {
+  if (text === null || text === undefined) return "";
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-/* DASHBOARD */
-if (isDashboardPage) {
-  let projects = {};
-  let currentProject = "p1";
+onAuthStateChanged(auth, async (user) => {
+  const path = window.location.pathname.toLowerCase();
+  const onLogin = path.endsWith("login.html");
+  const onDashboard = path.endsWith("index.html") || path.endsWith("/");
 
-  const projectName = document.getElementById("projectName");
-  const projectGoal = document.getElementById("projectGoal");
-  const tabs = document.querySelectorAll(".tab");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const projectDescription = document.getElementById("projectDescription");
-  const customerDescription = document.getElementById("customerDescription");
-
-  function escapeHtml(text) {
-    if (text === null || text === undefined) return "";
-    return String(text)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
+  if (onDashboard && !user) {
+    window.location.href = "login.html";
+    return;
   }
 
-  function renderProject(project) {
-    if (!project) return;
-    projectName.textContent = project.name || "Ukjent prosjekt";
-    projectGoal.textContent =
-      project.goalText ||
-      project.goal ||
-      "Her kan prosjektets aktive delmål vises";
+  if (onLogin && user) {
+    window.location.href = "index.html";
+    return;
   }
 
-  // Mohamed – last prosjekt- og kundebeskrivelse fra samme project-doc
-  async function loadDescriptions(projectId) {
-    if (!projectId) return;
+  if (onDashboard && user) {
+    await loadCustomerPortal(user);
+  }
+});
 
-    try {
+async function loadCustomerPortal(user) {
+  try {
+    const userSnap = await getDoc(doc(db, "users", user.uid));
+
+    if (!userSnap.exists()) {
+      showNoProject("Fant ikke kundeinformasjon.");
+      return;
+    }
+
+    const userData = userSnap.data();
+
+    if (userData.role !== "customer") {
+      showNoProject("Denne brukeren har ikke tilgang til kundeportalen.");
+      return;
+    }
+
+    const projectIds = userData.projectIds || [];
+    const projects = [];
+
+    for (const projectId of projectIds) {
       const projectSnap = await getDoc(doc(db, "projects", projectId));
-      if (!projectSnap.exists()) return;
 
-      const data = projectSnap.data();
-
-      if (projectDescription) {
-        projectDescription.innerHTML = escapeHtml(
-          data.prosjektBeskrivelse ||
-          data.description ||
-          "Ingen prosjektbeskrivelse tilgjengelig."
-        ).replace(/\n/g, "<br>");
-      }
-
-      if (customerDescription) {
-        customerDescription.innerHTML = escapeHtml(
-          data.kundeBeskrivelse ||
-          data.customerDescription ||
-          "Ingen kundebeskrivelse tilgjengelig."
-        ).replace(/\n/g, "<br>");
-      }
-    } catch (error) {
-      console.error("// Mohamed – Kunne ikke laste prosjektdata:", error);
-    }
-  }
-
-  // Mohamed – sender valgt prosjekt til andre moduler
-  function dispatchProject(project) {
-    if (!project?.id) return;
-
-    window.currentProjectId = project.id;
-    window.dispatchEvent(
-      new CustomEvent("projectChanged", {
-        detail: { projectId: project.id }
-      })
-    );
-  }
-
-  // Mohamed – leser prosjekter fra Firestore og fyller tab-navn
-  async function loadProjects() {
-    try {
-      const snapshot = await getDocs(collection(db, "projects"));
-      const docs = [];
-
-      snapshot.forEach((docSnap) => {
-        docs.push({
-          id: docSnap.id,
-          ...docSnap.data()
+      if (projectSnap.exists()) {
+        projects.push({
+          id: projectSnap.id,
+          ...projectSnap.data()
         });
-      });
-
-      docs.sort((a, b) => (a.name || "").localeCompare(b.name || "", "no"));
-
-      tabs.forEach((tab, index) => {
-        const project = docs[index];
-        if (!project) return;
-
-        projects[tab.dataset.project] = project;
-        tab.textContent = project.name || `Prosjekt ${index + 1}`;
-      });
-
-      const firstProject = projects[currentProject];
-      if (firstProject) {
-        renderProject(firstProject);
-        await loadDescriptions(firstProject.id);
-        dispatchProject(firstProject);
       }
-    } catch (error) {
-      console.error("// Mohamed – Kunne ikke laste prosjekter:", error);
     }
+
+    if (!projects.length) {
+      showNoProject("Du har ingen prosjekter tilknyttet.");
+      return;
+    }
+
+    renderProjectSelector(projects);
+    setActiveProject(projects[0]);
+
+  } catch (error) {
+    console.error("Kundeportal error:", error);
+    showNoProject("Kunne ikke laste prosjektdata.");
+  }
+}
+
+function renderProjectSelector(projects) {
+  if (!projectSelectorContainer) return;
+
+  if (projectTabs) {
+    projectTabs.classList.add("hidden");
+    projectTabs.innerHTML = "";
   }
 
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", async () => {
-      tabs.forEach((t) => t.classList.remove("is-active"));
-      tab.classList.add("is-active");
+  if (projects.length === 1) {
+    projectSelectorContainer.innerHTML = `
+      <div class="big">${escapeHtml(projects[0].name || "Uten navn")}</div>
+    `;
+    return;
+  }
 
-      currentProject = tab.dataset.project;
-      const project = projects[currentProject];
-      if (!project) return;
+  projectSelectorContainer.innerHTML = `
+    <select id="projectSelector" class="project-dropdown">
+      ${projects.map(project => `
+        <option value="${escapeHtml(project.id)}">
+          ${escapeHtml(project.name || "Uten navn")}
+        </option>
+      `).join("")}
+    </select>
+  `;
 
-      renderProject(project);
-      await loadDescriptions(project.id);
-      dispatchProject(project);
+  const select = document.getElementById("projectSelector");
+
+  if (select) {
+    select.addEventListener("change", () => {
+      const selectedProject = projects.find(project => project.id === select.value);
+      setActiveProject(selectedProject);
     });
+  }
+}
+
+function setActiveProject(project) {
+  if (!project) return;
+
+  if (projectGoal) {
+    projectGoal.textContent = project.goal || project.goalText || "Ingen delmål registrert.";
+  }
+
+  if (projectDescription) {
+    projectDescription.innerHTML = escapeHtml(
+      project.description ||
+      project.prosjektBeskrivelse ||
+      "Ingen prosjektbeskrivelse tilgjengelig."
+    ).replace(/\n/g, "<br>");
+  }
+
+  if (customerDescription) {
+    customerDescription.innerHTML = escapeHtml(
+      project.customerDescription ||
+      project.kundeBeskrivelse ||
+      "Ingen kundebeskrivelse tilgjengelig."
+    ).replace(/\n/g, "<br>");
+  }
+
+  window.currentProjectId = project.id;
+
+  window.dispatchEvent(
+    new CustomEvent("projectChanged", {
+      detail: {
+        projectId: project.id,
+        projectData: project
+      }
+    })
+  );
+}
+
+function showNoProject(message) {
+  if (projectSelectorContainer) {
+    projectSelectorContainer.innerHTML = `<div class="big">Ingen prosjekter</div>`;
+  }
+
+  if (projectGoal) {
+    projectGoal.textContent = message;
+  }
+
+  if (projectTabs) {
+    projectTabs.classList.add("hidden");
+  }
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+
+    localStorage.removeItem("customer_logged_in");
+    localStorage.removeItem("customer_uid");
+    localStorage.removeItem("customer_name");
+    localStorage.removeItem("customer_email");
+    localStorage.removeItem("customer_projectIds");
+    localStorage.removeItem("role");
+
+    window.location.href = "login.html";
   });
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("customer_logged_in");
-      localStorage.removeItem("role");
-      window.location.href = "login.html";
-    });
-  }
-
-  loadProjects();
 }

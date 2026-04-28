@@ -26,9 +26,6 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* =========================================================
-   HJELPEFUNKSJONER
-========================================================= */
 const WEEK_DAY_LABELS = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
 
 function getWeekStart() {
@@ -73,9 +70,6 @@ function getFileDate(data) {
   );
 }
 
-/* =========================================================
-   STATE
-========================================================= */
 let _state = {
   progressPct: 0,
   weekDescription: "Ingen ukesstatus lagt inn ennå.",
@@ -115,9 +109,6 @@ function stopAll() {
   _unsubs = [];
 }
 
-/* =========================================================
-   DERIVED STATE
-========================================================= */
 function recomputeDerivedState() {
   _state.daysLeft = Math.max(0, (_state.durationDays || 0) - (_state.daysUsed || 0));
 
@@ -213,9 +204,6 @@ function recomputeDerivedState() {
   ].filter(Boolean).join(" ");
 }
 
-/* =========================================================
-   LIVE-LYTTERE
-========================================================= */
 function startLiveAnalytics(projectId) {
   stopAll();
 
@@ -253,7 +241,6 @@ function startLiveAnalytics(projectId) {
 
   showLoading();
 
-  // Mohamed – prosjektdokument fra samme Firebase som ansatt
   _unsubs.push(onSnapshot(
     doc(db, "projects", projectId),
     (snap) => {
@@ -290,7 +277,6 @@ function startLiveAnalytics(projectId) {
     }
   ));
 
-  // Mohamed – kunde ser kun filer som er synlige for kunde
   _unsubs.push(onSnapshot(
     query(collection(db, "files"), where("projectId", "==", projectId)),
     (snap) => {
@@ -338,7 +324,6 @@ function startLiveAnalytics(projectId) {
     }
   ));
 
-  // Mohamed – meldinger
   _unsubs.push(onSnapshot(
     query(collection(db, "messages"), where("projectId", "==", projectId)),
     (snap) => {
@@ -371,9 +356,6 @@ function startLiveAnalytics(projectId) {
   ));
 }
 
-/* =========================================================
-   SVG GRAF – milepæl-fremgang per dag
-========================================================= */
 function buildProgressChart() {
   const todayIdx = getTodayWeekIndex();
   const milestones = _state.milestones || [];
@@ -482,9 +464,6 @@ function buildProgressChart() {
   `;
 }
 
-/* =========================================================
-   RENDER
-========================================================= */
 function showLoading() {
   const c = document.getElementById("weekPlaceholder");
   if (c) {
@@ -523,7 +502,6 @@ function renderWidget() {
     nextMilestoneDate,
     milestoneRisk,
     milestoneRiskLabel,
-    activityLabel,
     activityTone,
     summaryText,
     alerts
@@ -554,10 +532,6 @@ function renderWidget() {
       </div>
 
       <p class="analytics-desc">${weekDescription}</p>
-
-      <div class="analytics-bar-track">
-        <div class="analytics-bar-fill" id="innerBar" style="width:0%"></div>
-      </div>
 
       <div class="analytics-summary-card">
         <div class="analytics-summary-title">Prosjektoppsummering</div>
@@ -595,7 +569,7 @@ function renderWidget() {
           <div class="analytics-mini-title">Risiko basert på milepæl</div>
           <div class="analytics-mini-big">${milestoneRiskLabel}</div>
           <div class="analytics-mini-meta">Neste: ${formatDateNo(nextMilestoneDate)}</div>
-          <div class="analytics-mini-meta tone-${activityTone}">${activityLabel}</div>
+          <div class="analytics-mini-meta tone-${activityTone}">${_state.activityLabel}</div>
         </div>
       </div>
 
@@ -617,16 +591,12 @@ function renderWidget() {
     </div>
   `;
 
-  animateBar("innerBar", pct);
   animateBar("heroProgressBar", pct);
 
   const heroPctEl = document.getElementById("heroProgressPct");
   if (heroPctEl) heroPctEl.textContent = pct + "%";
 }
 
-/* =========================================================
-   INIT + CSS
-========================================================= */
 function injectCustomerAnalyticsStyles() {
   if (document.getElementById("customerAnalyticsStyles")) return;
 

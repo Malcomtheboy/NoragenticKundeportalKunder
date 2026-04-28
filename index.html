@@ -116,21 +116,33 @@
 
         <section class="panel card">
           <div class="section-title">Gruppechat</div>
-          <p class="section-description">
-            Her kan du kommunisere direkte med prosjektteamet.
-          </p>
-
-          <div class="chat-box">
+          <p class="section-description">Her er gruppechat mellom kunde og ansatte på prosjektet.</p>
+          <div class="chat-container">
+            <div class="chat-top">
+              <span>Gruppechat</span>
+              <button id="expandChat">⤢</button>
+            </div>
             <div id="chatMessages" class="chat-messages"></div>
-
             <form id="chatForm" class="chat-input">
               <input id="chatInput" type="text" placeholder="Skriv melding..." />
-              <button type="submit" class="btn">Send</button>
+              <button type="submit">Send</button>
             </form>
-
-            <button id="testBtn" class="btn small" type="button">Test DB</button>
           </div>
         </section>
+
+        <div id="chatModal" class="chat-modal">
+          <div class="chat-modal-content">
+            <div class="chat-header">
+              <span>Gruppechat</span>
+              <button id="closeChat">✕</button>
+            </div>
+            <div id="chatMessagesBig" class="chat-messages"></div>
+            <form id="chatFormBig" class="chat-input">
+              <input id="chatInputBig" type="text" placeholder="Skriv melding..." />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        </div>
       </div>
     </section>
   </main>

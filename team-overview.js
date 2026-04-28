@@ -1,5 +1,5 @@
 import { auth, db } from "./firebase-auth.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   collection,
   getDocs
@@ -51,13 +51,7 @@ function isUserOnProject(user, projectId) {
 }
 
 async function ensureFirebaseLogin() {
-  try {
-    if (!auth.currentUser) {
-      await signInWithEmailAndPassword(auth, "test@test.no", "123456");
-    }
-  } catch (e) {
-    console.error("Firebase login feilet:", e);
-  }
+  return;
 }
 
 function renderLoading() {

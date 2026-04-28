@@ -1,6 +1,6 @@
 // Mohamed – kundeportal file-manager.js
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
   collection,
@@ -57,15 +57,8 @@ function escapeHtml(text) {
     .replaceAll("'", "&#39;");
 }
 
-// Mohamed – midlertidig service-login slik resten av prosjektet gjør
 async function ensureFirebaseLogin() {
-  try {
-    if (!auth.currentUser) {
-      await signInWithEmailAndPassword(auth, "test@test.no", "123456");
-    }
-  } catch (e) {
-    console.error("// Mohamed – Firebase login feilet:", e);
-  }
+  return;
 }
 
 function renderBreadcrumbs() {

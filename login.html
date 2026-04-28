@@ -23,25 +23,39 @@
 
         <label class="auth-field">
           <span>E-post</span>
-          <input type="email" required />
+          <input 
+            id="email"
+            type="email" 
+            placeholder="kunde@firma.no"
+            autocomplete="email"
+            required 
+          />
         </label>
 
         <label class="auth-field">
           <span>Passord</span>
-          <input type="password" required />
+          <input 
+            id="password"
+            type="password" 
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required 
+          />
         </label>
 
         <button class="btn primary" type="submit">
           Logg inn
         </button>
 
-        <p id="hint"></p>
+        <p id="hint" class="auth-hint"></p>
 
       </form>
 
     </div>
   </main>
 
-  <script type="module" src="script.js"></script> <!--@aslak denne var feil (manglet type=module-->
+  <!-- Kun denne trengs -->
+  <script type="module" src="customer-login.js"></script>
+
 </body>
 </html>

@@ -1401,3 +1401,7 @@ body{
   font-size: 13px;
   color: rgba(255,255,255,0.70);
 }
+
+.team-show-more-btn{
+  margin-top: 12px;
+}

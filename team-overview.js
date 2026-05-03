@@ -72,12 +72,16 @@ function renderEmpty() {
   teamPlaceholder.innerHTML = "Ingen ansatte er koblet til dette prosjektet ennå.";
 }
 
-function renderMembers(members) {
+function renderMembers(members, showAll = false) {
   if (!teamPlaceholder) return;
+
+  const MAX = 3;
+  const visibleMembers = showAll ? members : members.slice(0, MAX);
+  const hiddenCount = members.length - MAX;
 
   const html = `
     <div class="team-list">
-      ${members.map((member) => {
+      ${visibleMembers.map((member) => {
         const initials = getInitials(member.name);
 
         return `
@@ -102,10 +106,26 @@ function renderMembers(members) {
         `;
       }).join("")}
     </div>
+
+    ${
+      members.length > MAX
+        ? `<button id="toggleMembersBtn" class="btn small team-show-more-btn">
+            ${showAll ? "Vis færre" : `Vis flere (${hiddenCount})`}
+          </button>`
+        : ""
+    }
   `;
 
   teamPlaceholder.className = "";
   teamPlaceholder.innerHTML = html;
+
+  const toggleBtn = document.getElementById("toggleMembersBtn");
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      renderMembers(members, !showAll);
+    });
+  }
 }
 
 async function loadTeamOverview(projectId) {

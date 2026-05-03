@@ -127,8 +127,8 @@ function setActiveProject(project) {
 
   if (projectDescription) {
     projectDescription.innerHTML = escapeHtml(
-      project.description ||
       project.prosjektBeskrivelse ||
+      project.description ||
       "Ingen prosjektbeskrivelse tilgjengelig."
     ).replace(/\n/g, "<br>");
   }

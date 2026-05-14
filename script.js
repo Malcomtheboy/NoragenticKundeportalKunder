@@ -22,17 +22,18 @@ function escapeHtml(text) {
 onAuthStateChanged(auth, async (user) => {
   const path = window.location.pathname.toLowerCase();
   const onLogin = path.endsWith("login.html");
+  const onLanding = path.endsWith("landing.html");
   const onDashboard = path.endsWith("index.html") || path.endsWith("/");
 
-  if (onDashboard && !user) {
-    window.location.href = "login.html";
-    return;
-  }
+if ((onDashboard || onLanding) && !user) {
+  window.location.href = "login.html";
+  return;
+}
 
-  if (onLogin && user) {
-    window.location.href = "index.html";
-    return;
-  }
+if (onLogin && user) {
+  window.location.href = "landing.html";
+  return;
+}
 
   if (onDashboard && user) {
     await loadCustomerPortal(user);
@@ -75,7 +76,17 @@ async function loadCustomerPortal(user) {
     }
 
     renderProjectSelector(projects);
-    setActiveProject(projects[0]);
+    const selectedProjectId = localStorage.getItem("selected_project_id");
+    const selectedProject =
+      projects.find(project => project.id === selectedProjectId) || projects[0];
+
+    renderProjectSelector(projects);
+    setActiveProject(selectedProject);
+
+    const projectSelector = document.getElementById("projectSelector");
+    if (projectSelector) {
+      projectSelector.value = selectedProject.id;
+    }
 
   } catch (error) {
     console.error("Kundeportal error:", error);
@@ -165,6 +176,14 @@ function showNoProject(message) {
   if (projectTabs) {
     projectTabs.classList.add("hidden");
   }
+}
+
+const backToLandingBtn = document.getElementById("backToLandingBtn");
+
+if (backToLandingBtn) {
+  backToLandingBtn.addEventListener("click", () => {
+    window.location.href = "landing.html";
+  });
 }
 
 if (logoutBtn) {

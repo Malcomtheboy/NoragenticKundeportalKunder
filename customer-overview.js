@@ -45,19 +45,19 @@ function isUserOnProject(user, projectId) {
 function renderLoading() {
   if (!customerPlaceholder) return;
   customerPlaceholder.className = "team-loading";
-  customerPlaceholder.innerHTML = "Laster kunder...";
+  customerPlaceholder.innerHTML = "Laster kontaktpersoner...";
 }
 
 function renderError() {
   if (!customerPlaceholder) return;
   customerPlaceholder.className = "team-error";
-  customerPlaceholder.innerHTML = "Kunne ikke laste kunder.";
+  customerPlaceholder.innerHTML = "Kunne ikke laste kontaktpersoner.";
 }
 
 function renderEmpty() {
   if (!customerPlaceholder) return;
   customerPlaceholder.className = "team-empty";
-  customerPlaceholder.innerHTML = "Ingen kunder er koblet til dette prosjektet ennå.";
+  customerPlaceholder.innerHTML = "Ingen kontaktpersoner er koblet til dette prosjektet ennå.";
 }
 
 function renderMembers(members) {

@@ -32,6 +32,12 @@ const closeBtn = document.getElementById("closeChat");
 let activeMenu = null;
 let editingMessageId = null;
 
+/**
+ * Gjør tekst trygg å vise i HTML.
+ *
+ * @param {unknown} value Verdi som skal konverteres til trygg tekst.
+ * @returns {string} Escapet tekststreng.
+ */
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => {
     const map = {
@@ -45,6 +51,17 @@ function escapeHtml(value) {
   });
 }
 
+/**
+ * Bygger et brukerobjekt fra Firebase Auth og Firestore.
+ *
+ * @param {import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js").User} user Innlogget bruker.
+ * @returns {Promise<{
+ *   uid: string,
+ *   email: string,
+ *   name: string,
+ *   role: string
+ * }>}
+ */
 async function buildUser(user) {
   let firestoreData = {};
 
@@ -68,6 +85,12 @@ async function buildUser(user) {
   };
 }
 
+/**
+ * Formaterer tidspunkt for visning i chatten.
+ *
+ * @param {any} value Tidspunkt fra Firestore eller timestamp.
+ * @returns {string} Formatert tidspunkt.
+ */
 function formatTime(value) {
   if (!value) return "";
 
@@ -113,18 +136,37 @@ function formatTime(value) {
   });
 }
 
+/**
+ * Lukker aktiv meny for meldingshandlinger.
+ *
+ * @returns {void}
+ */
 function closeActiveMenu() {
   if (!activeMenu) return;
   activeMenu.classList.remove("active");
   activeMenu = null;
 }
 
+/**
+ * Setter en melding i redigeringsmodus.
+ *
+ * @param {string} messageId ID til meldingen som skal redigeres.
+ * @param {string} currentText Nåværende tekst i meldingen.
+ * @returns {Promise<void>}
+ */
 async function editMessage(messageId, currentText) {
   editingMessageId = messageId;
   closeActiveMenu();
   loadChat();
 }
 
+/**
+ * Lagrer redigert melding i Firestore.
+ *
+ * @param {string} messageId ID til meldingen som skal lagres.
+ * @param {HTMLTextAreaElement | HTMLInputElement | null | undefined} source Inputfelt som inneholder ny tekst.
+ * @returns {Promise<void>}
+ */
 async function saveEditedMessage(messageId, source) {
   const nextText = source?.value?.trim();
   if (!nextText) return;
@@ -141,6 +183,12 @@ async function saveEditedMessage(messageId, source) {
   }
 }
 
+/**
+ * Sletter en melding etter bekreftelse fra brukeren.
+ *
+ * @param {string} messageId ID til meldingen som skal slettes.
+ * @returns {Promise<void>}
+ */
 async function deleteMessage(messageId) {
   const confirmed = confirm("Vil du slette denne meldingen?");
   if (!confirmed) return;
@@ -153,17 +201,33 @@ async function deleteMessage(messageId) {
   }
 }
 
+/**
+ * Viser en systemmelding i chatten.
+ *
+ * @param {string} text Tekst som skal vises.
+ * @returns {void}
+ */
 function renderSystemMessage(text) {
   const html = `<div class="msg other">${escapeHtml(text)}</div>`;
   if (chatBox) chatBox.innerHTML = html;
   if (chatBoxBig) chatBoxBig.innerHTML = html;
 }
 
+/**
+ * Tømmer begge chatvisningene.
+ *
+ * @returns {void}
+ */
 function clearMessages() {
   if (chatBox) chatBox.innerHTML = "";
   if (chatBoxBig) chatBoxBig.innerHTML = "";
 }
 
+/**
+ * Scroller begge chatvisningene til bunnen.
+ *
+ * @returns {void}
+ */
 function scrollToBottom() {
   if (chatBox) {
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -173,6 +237,12 @@ function scrollToBottom() {
   }
 }
 
+/**
+ * Renderer én melding som et DOM-element.
+ *
+ * @param {Record<string, any>} [msg={}] Meldingsdata.
+ * @returns {HTMLDivElement} Ferdig rendret meldingselement.
+ */
 function renderMsg(msg = {}) {
   const div = document.createElement("div");
   const isMe = msg.uid === currentUser?.uid;
@@ -287,6 +357,12 @@ function renderMsg(msg = {}) {
   return div;
 }
 
+/**
+ * Laster prosjektdata og sjekker om kunden har tilgang.
+ *
+ * @param {string} projectId ID til prosjektet som skal lastes.
+ * @returns {Promise<boolean>} True hvis prosjektet finnes og brukeren har tilgang.
+ */
 async function loadProject(projectId) {
   const projectSnap = await getDoc(doc(db, "projects", projectId));
 
@@ -310,6 +386,11 @@ async function loadProject(projectId) {
   return true;
 }
 
+/**
+ * Laster inn meldinger for aktivt prosjekt i sanntid.
+ *
+ * @returns {void}
+ */
 function loadChat() {
   if (messagesUnsub) {
     messagesUnsub();
@@ -373,6 +454,12 @@ function loadChat() {
   );
 }
 
+/**
+ * Sender en ny melding til aktiv prosjektchat.
+ *
+ * @param {string} text Teksten som skal sendes.
+ * @returns {Promise<void>}
+ */
 async function sendMessage(text) {
   if (!text || !currentUser || !currentProjectId || !currentProjectData) return;
 
@@ -401,6 +488,9 @@ async function sendMessage(text) {
   }
 }
 
+/**
+ * Håndterer innsending av melding fra mini-chatten.
+ */
 if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -414,6 +504,9 @@ if (form) {
   });
 }
 
+/**
+ * Håndterer innsending av melding fra fullskjerm-chatten.
+ */
 if (formBig) {
   formBig.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -427,18 +520,27 @@ if (formBig) {
   });
 }
 
+/**
+ * Åpner fullskjerm-chatten.
+ */
 if (openBtn && modal) {
   openBtn.addEventListener("click", () => {
     modal.classList.add("active");
   });
 }
 
+/**
+ * Lukker fullskjerm-chatten med lukkeknappen.
+ */
 if (closeBtn && modal) {
   closeBtn.addEventListener("click", () => {
     modal.classList.remove("active");
   });
 }
 
+/**
+ * Lukker fullskjerm-chatten ved klikk utenfor innholdet.
+ */
 if (modal) {
   modal.addEventListener("click", (event) => {
     if (event.target === modal) {
@@ -447,6 +549,9 @@ if (modal) {
   });
 }
 
+/**
+ * Bytter aktivt prosjekt når resten av applikasjonen sender prosjektendring.
+ */
 window.addEventListener("projectChanged", async (event) => {
   if (!currentUser) return;
 
@@ -464,6 +569,9 @@ window.addEventListener("projectChanged", async (event) => {
   loadChat();
 });
 
+/**
+ * Kjører når innlogget bruker endrer seg.
+ */
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     currentUser = null;
@@ -482,6 +590,9 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+/**
+ * Lukker aktiv meny når brukeren klikker utenfor.
+ */
 document.addEventListener("click", () => {
   closeActiveMenu();
 });

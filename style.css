@@ -1717,3 +1717,354 @@ body{
   font-size: 13px;
   color: rgba(255,255,255,0.70);
 }
+<<<<<<< HEAD
+=======
+
+.team-show-more-btn{
+  margin-top: 12px;
+}
+
+/* =========================================================
+   LANDING PAGE
+========================================================= */
+
+.landing-hero{
+  margin-bottom:22px;
+}
+
+.landing-hero h1{
+  margin:0 0 6px;
+  font-size:34px;
+  font-weight:800;
+}
+
+.landing-hero h2{
+  margin:0 0 10px;
+  font-size:22px;
+  font-weight:700;
+  color:rgba(255,255,255,0.92);
+}
+
+.landing-projects-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:16px;
+}
+
+.project-card{
+  position:relative;
+  overflow:hidden;
+  padding:20px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(180deg,
+      rgba(90,108,160,0.34),
+      rgba(60,78,130,0.22));
+  backdrop-filter:blur(14px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.28);
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease;
+  cursor:pointer;
+}
+
+.project-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,255,255,0.24);
+  background:
+    linear-gradient(180deg,
+      rgba(100,120,180,0.42),
+      rgba(70,90,150,0.30));
+}
+
+.project-card-title{
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:10px;
+  color:white;
+}
+
+.project-card-description{
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,0.74);
+  margin-bottom:18px;
+}
+
+.project-card-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.project-card-risk{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  border:1px solid rgba(255,255,255,0.14);
+}
+
+.project-card-risk.low{
+  background:rgba(74,222,128,0.12);
+  color:#86efac;
+}
+
+.project-card-risk.medium{
+  background:rgba(250,204,21,0.12);
+  color:#fde047;
+}
+
+.project-card-risk.high{
+  background:rgba(248,113,113,0.12);
+  color:#fca5a5;
+}
+
+.project-card-progress{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.project-progress-bar{
+  width:120px;
+  height:8px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.10);
+}
+
+.project-progress-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#60a5fa,#818cf8);
+}
+
+.project-progress-label{
+  font-size:12px;
+  font-weight:700;
+  color:rgba(255,255,255,0.88);
+}
+
+.notification-box{
+  margin-bottom:18px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
+}
+
+.notification-box.is-hidden{
+  display:none;
+}
+
+.notification-title{
+  font-size:14px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+.notification-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.notification-item{
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.back-to-landing-btn{
+  height:38px;
+  padding:0 14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.88);
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .18s ease;
+  backdrop-filter:blur(10px);
+}
+
+.back-to-landing-btn:hover{
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.22);
+  transform:translateY(-1px);
+}
+
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.landing-project-card{
+  padding:20px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:linear-gradient(180deg, rgba(90,108,160,0.34), rgba(60,78,130,0.22));
+  box-shadow:0 12px 30px rgba(0,0,0,0.28);
+  cursor:pointer;
+  transition:all .18s ease;
+}
+
+.landing-project-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,255,255,0.24);
+}
+
+.landing-project-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.landing-project-title{
+  font-size:20px;
+  font-weight:800;
+  color:white;
+}
+
+.landing-project-customer,
+.landing-project-description{
+  font-size:13px;
+  color:rgba(255,255,255,0.72);
+  line-height:1.5;
+}
+
+.landing-project-description{
+  margin-bottom:14px;
+}
+
+.landing-project-percent{
+  font-size:18px;
+  font-weight:800;
+}
+
+.landing-risk-badge{
+  display:inline-block;
+  margin-bottom:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:rgba(255,255,255,0.08);
+}
+
+.landing-risk-badge.risk-low{
+  color:#86efac;
+}
+
+.landing-risk-badge.risk-medium{
+  color:#fde047;
+}
+
+.landing-risk-badge.risk-high{
+  color:#fca5a5;
+}
+
+.landing-project-bar{
+  height:8px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.10);
+  margin-bottom:14px;
+}
+
+.landing-project-bar-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#60a5fa,#818cf8);
+}
+
+.landing-project-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+.landing-project-open{
+  font-size:13px;
+  font-weight:700;
+  color:rgba(255,255,255,0.9);
+}
+.landing-hidden-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:16px;
+}
+
+.hidden-project-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.05);
+}
+
+.hidden-project-info{
+  min-width:0;
+}
+
+.hidden-project-title{
+  font-size:14px;
+  font-weight:800;
+  color:rgba(255,255,255,0.94);
+  margin-bottom:3px;
+}
+
+.hidden-project-meta{
+  font-size:12px;
+  color:rgba(255,255,255,0.68);
+}
+
+.unhide-project-btn{
+  flex-shrink:0;
+}
+
+/* =========================================================
+   FADE ANIMATIONS
+========================================================= */
+
+.fade-in{
+  opacity:0;
+  transform:translateY(6px);
+  animation:fadeIn 0.25s ease forwards;
+}
+
+.fade-out{
+  opacity:1;
+  transform:translateY(0);
+  animation:fadeOut 0.2s ease forwards;
+}
+
+@keyframes fadeIn{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes fadeOut{
+  to{
+    opacity:0;
+    transform:translateY(6px);
+  }
+}
+>>>>>>> 3b601af1ee6b6fc97d06eee0d45002d1c177e259

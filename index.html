@@ -8,9 +8,15 @@
 </head>
 <body>
   <div class="bg"></div>
-
   <header class="topbar">
-    <div class="logo">N</div>
+
+    <div class="topbar-left">
+      <div class="logo">N</div>
+
+      <button id="backToLandingBtn" class="back-to-landing-btn" type="button">
+        ← Landing
+      </button>
+    </div>
 
     <nav class="project-tabs hidden" id="projectTabs"></nav>
 
@@ -97,13 +103,13 @@
         </section>
 
                 <section class="panel card">
-          <div class="section-title">Kunder på prosjekt</div>
+          <div class="section-title">Kontaktpersoner</div>
           <p class="section-description">
-            Oversikt over hvilke kunder som er tilknyttet prosjektet.
+            Oversikt over hvilke kontaktpersoner som er tilknyttet prosjektet.
           </p>
 
           <div id="customerPlaceholder" class="team-loading">
-            Laster kunder...
+            Laster kontaktpersoner...
           </div>
         </section>
 
@@ -117,15 +123,8 @@
           <div class="editable-box" id="projectDescription" data-placeholder="Ingen prosjektbeskrivelse tilgjengelig."></div>
         </section>
 
-        <section class="panel card">
-          <div class="section-title">Kundebeskrivelse</div>
-          <p class="section-description">
-            Informasjon som er relevant for deg som kunde.
-          </p>
-
-          <div class="editable-box" id="customerDescription" data-placeholder="Ingen kundebeskrivelse tilgjengelig."></div>
-        </section>
-
+        
+         
         <section class="panel card">
           <div class="section-title">Gruppechat</div>
           <p class="section-description">Her er gruppechat mellom kunde og ansatte på prosjektet.</p>
